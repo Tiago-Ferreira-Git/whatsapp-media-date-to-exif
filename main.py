@@ -42,6 +42,7 @@ def parse_arguments():
     parser.add_argument('--output_path', help='New Whatsapp Images and videos path to scan', required=True)
     parser.add_argument('--recursive', action='store_true', help='Run recursively in the provided folder')
     parser.add_argument('--overwrite', action='store_true', help='Overwrite existing files in the output path')
+    parser.add_argument('--keep_original_path', action='store_true', help='Overwrite existing files in the original path')
     args = parser.parse_args()
 
     if not args:
@@ -56,7 +57,7 @@ def get_files_from_path(path, recursive=False, output_path=''):
         file_paths = [os.path.join(root, file) for root, _, files in os.walk(path) for file in files]
     else:
         file_paths = [os.path.join(path, file) for file in os.listdir(path) if os.path.isfile(os.path.join(path, file))]
-    
+  
     for file_path in file_paths:
         filename = os.path.basename(file_path)
         extension = os.path.splitext(filename)[1][1:].lower()
@@ -141,9 +142,10 @@ def new_image_exif_data(file):
     return file, exif_bytes
 
 
-def save_exif_data(file, img, output_path, overwrite):
+def save_exif_data(file, img, output_path, overwrite,keep_original_path):
     os.makedirs(output_path, exist_ok=True)
     new_file_path = os.path.join(output_path, file.filename)
+
     if os.path.exists(new_file_path):
         if not overwrite:
             return
@@ -156,10 +158,15 @@ def save_exif_data(file, img, output_path, overwrite):
     new_filename = f"{base}_{counter}{ext}"
     new_file_path = os.path.join(output_path, new_filename)
     counter += 1
-    img.save(new_file_path, exif=file.exif_bytes)
+    
+    if keep_original_path:
+        img.save(file.file_path, exif=file.exif_bytes)
+    else:
+        img.save(new_file_path, exif=file.exif_bytes)
+        file.new_file_path = new_file_path
+
     img.close()
     
-    file.new_file_path = new_file_path
     logger.info(f"'{file.new_file_path}' saved successfully")
     
     assert check_exif(file), "New file doesn't have exif data."
@@ -171,12 +178,13 @@ def main():
     spinner = Halo(text='Retrieving list of media files...\n', spinner='dots')
     spinner.start()
     files_list = get_files_from_path(path=args.input_path, recursive=args.recursive)
-
+    
     for file in files_list:
         if isinstance(file, str):
             file = File(filename=os.path.basename(file), file_path=file)
         
-        spinner.text = f'Processing: {file.filename}'
+        spinner.text = f'Processing: {file.file_path}'
+
         
         try:
             process_file(file, args, spinner)
@@ -202,7 +210,8 @@ def process_file(file, args, spinner):
         file=file,
         img=im,
         output_path=args.output_path,
-        overwrite=args.overwrite
+        overwrite=args.overwrite,
+        keep_original_path=args.keep_original_path
     )
     
     logger.info(file)
