@@ -167,7 +167,10 @@ def save_exif_data(file, img, output_path, overwrite,keep_original_path):
 
     img.close()
     
-    logger.info(f"'{file.new_file_path}' saved successfully")
+    if keep_original_path:
+        logger.info(f"'{file.file_path}' saved successfully")
+    else:
+        logger.info(f"'{file.new_file_path}' saved successfully")
     
     assert check_exif(file), "New file doesn't have exif data."
 
