@@ -24,12 +24,12 @@ Screenshot
 
 ### Arguments
 
-| Argument       | Required | Description                                           |
-|----------------|----------|-------------------------------------------------------|
-| `--input_path` | Yes      | Path to the folder containing WhatsApp media files    |
-| `--output_path`| Yes      | Path to save the processed media files                |
-| `--overwrite`  | No       | Overwrite existing files in the output path if present|
-| `--recursive`  | No       | Scan input folder recursively for media files         |
+| Argument                | Required | Description                                           |
+|-------------------------|----------|-------------------------------------------------------|
+| `--input_path`          | Yes      | Path to the folder containing WhatsApp media files    |
+| `--output_path`         | Yes      | Path to save the processed media files                |
+| `--overwrite`           | No       | Overwrite existing files in the output path if present|
+| `--recursive`           | No       | Scan input folder recursively for media files         |
 | `--keep_original_path`  | No       | Lazy way to change the programs' behaviour into keeping the files in the original folder (ignores the `--output_path` flag)         |
 
 Basic syntax:
